@@ -1,0 +1,8 @@
+{
+  "slug": "jane-doe",
+  "name": "Jane Doe",
+  "credentials": "Licensed Insurance Agent, 12+ years",
+  "bio": "Jane has spent over a decade helping consumers understand auto and home insurance coverage before they buy.",
+  "avatar": "/images/authors/jane-doe.jpg",
+  "socialLinks": { "linkedin": "https://linkedin.com/in/janedoe" }
+}
