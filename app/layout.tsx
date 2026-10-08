@@ -1,68 +1,94 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
+import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { MobileCallCta } from "@/components/layout/mobile-call-cta";
-import { ScrollDepthTracker } from "@/components/shared/scroll-depth-tracker";
-import { CampaignProvider } from "@/lib/campaign/campaign-context";
-import { ConsentProvider } from "@/lib/consent/consent-context";
-import { AnalyticsScripts } from "@/components/consent/analytics-scripts";
-import { CookieConsentBanner } from "@/components/consent/cookie-consent-banner";
-import { JsonLd } from "@/components/shared/json-ld";
-import { organizationJsonLd } from "@/lib/seo/json-ld";
-import { buildMetadata } from "@/lib/seo/metadata";
-import "./globals.css";
+import { CookieBanner } from "@/components/ui/cookie-banner";
+import { ScrollProgress } from "@/components/ui/scroll-progress";
+import { BackToTop } from "@/components/ui/back-to-top";
+import { LoadingScreen } from "@/components/ui/loading-screen";
+import { siteConfig } from "@/lib/seo";
 
-const fontDisplay = Fraunces({
+const fraunces = Fraunces({
   subsets: ["latin"],
   variable: "--font-display",
+  weight: ["300", "400", "500", "600"],
+  style: ["normal", "italic"],
   display: "swap",
-  weight: ["500", "600"],
 });
 
-const fontSans = Inter({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-body",
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
-const fontMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  display: "swap",
-  weight: ["500"],
-});
-
-export const metadata: Metadata = buildMetadata({ path: "/" });
+export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: `${siteConfig.name} — ${siteConfig.tagline}`,
+    template: `%s | ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  keywords: [
+    "performance advertising network",
+    "CPA marketing",
+    "affiliate network",
+    "traffic network",
+    "publisher network",
+    "media buying",
+  ],
+  authors: [{ name: siteConfig.name }],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteConfig.url,
+    siteName: siteConfig.name,
+    title: `${siteConfig.name} — ${siteConfig.tagline}`,
+    description: siteConfig.description,
+    images: [{ url: siteConfig.ogImage, width: 1200, height: 630, alt: siteConfig.name }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${siteConfig.name} — ${siteConfig.tagline}`,
+    description: siteConfig.description,
+    images: [siteConfig.ogImage],
+  },
+  icons: {
+    icon: "/favicon.svg",
+  },
+  robots: { index: true, follow: true },
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: siteConfig.name,
+    url: siteConfig.url,
+    description: siteConfig.description,
+    email: siteConfig.email,
+    sameAs: [],
+  };
+
   return (
-    <html lang="en" className={`${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable}`}>
-      <body className="pb-[68px] lg:pb-0">
-        <a
-          href="#main-content"
-          className="sr-only-focusable fixed left-4 top-4 z-50 rounded-md bg-navy-950 px-4 py-2 text-sm text-white"
-        >
-          Skip to content
-        </a>
-        <JsonLd data={organizationJsonLd()} />
-        {/*
-          CampaignProvider defaults to null here so every non-campaign
-          route gets standard organic behavior automatically. The
-          `/campaign/[slug]` route layout overrides this value with the
-          resolved campaign — see app/campaign/[campaignSlug]/layout.tsx.
-        */}
-        <CampaignProvider campaign={null}>
-          <ConsentProvider>
-            <Navbar />
-            <main id="main-content">{children}</main>
-            <Footer />
-            <MobileCallCta />
-            <ScrollDepthTracker />
-            <AnalyticsScripts />
-            <CookieConsentBanner />
-          </ConsentProvider>
-        </CampaignProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${fraunces.variable} ${inter.variable} font-body antialiased`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+        <ThemeProvider>
+          <LoadingScreen />
+          <ScrollProgress />
+          <Navbar />
+          <main>{children}</main>
+          <Footer />
+          <BackToTop />
+          <CookieBanner />
+        </ThemeProvider>
       </body>
     </html>
   );
