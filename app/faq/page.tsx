@@ -1,23 +1,44 @@
 import type { Metadata } from "next";
-import { Breadcrumbs } from "@/components/layout/breadcrumbs";
-import { SectionContainer } from "@/components/shared/section-container";
-import { FaqSection } from "@/components/marketing/faq-accordion";
-import { faqs } from "@/config/faq.config";
-import { buildMetadata } from "@/lib/seo/metadata";
+import { PageHero } from "@/components/shared/page-hero";
+import { FaqAccordion } from "@/components/shared/faq-accordion";
+import { CtaSection } from "@/components/home/cta-section";
+import { buildMetadata } from "@/lib/seo";
+import { faqs } from "@/lib/data";
 
 export const metadata: Metadata = buildMetadata({
+  title: "FAQ",
+  description: "Answers to common questions about VisionovaHQ's advertiser and publisher programs, traffic sources, and payments.",
   path: "/faq",
-  title: "Frequently Asked Questions",
-  description: "Answers to common questions about how InsureDirect works and how your information is used.",
 });
 
 export default function FaqPage() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+
   return (
     <>
-      <SectionContainer className="pb-0">
-        <Breadcrumbs items={[{ name: "FAQ", path: "/faq" }]} />
-      </SectionContainer>
-      <FaqSection items={faqs} title="Frequently asked questions" />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <PageHero
+        eyebrow="FAQ"
+        title="Questions, answered."
+        description="Everything you need to know about partnering with VisionovaHQ as an advertiser or publisher."
+      />
+      <section className="pb-28">
+        <div className="container-editorial">
+          <FaqAccordion />
+        </div>
+      </section>
+      <CtaSection />
     </>
   );
 }
